@@ -1,0 +1,59 @@
+:root{ --glow:#a855f7; }
+*{ font-family:'Inter',sans-serif; box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  background: radial-gradient(circle at 20% 20%, rgba(168,85,247,0.18), transparent 45%),
+              radial-gradient(circle at 80% 70%, rgba(139,92,246,0.15), transparent 45%),
+              linear-gradient(180deg,#09040e,#130924);
+}
+.glass{
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(168,85,247,0.25);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 40px rgba(168,85,247,0.08);
+}
+.btn-glow{
+  background: linear-gradient(135deg,#8b5cf6,#6d28d9);
+  box-shadow: 0 0 18px rgba(139,92,246,0.45);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn-glow:hover{ transform: translateY(-1px); box-shadow: 0 0 26px rgba(139,92,246,0.65); }
+.btn-glow:active{ transform: translateY(0); }
+.btn-ghost{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(168,85,247,0.3);
+  transition: background .15s ease;
+  color:#d8b4fe;
+}
+.btn-ghost:hover{ background: rgba(168,85,247,0.15); }
+.plus-btn{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(168,85,247,0.3);
+  transition: background .15s ease, transform .15s ease;
+  color:#d8b4fe;
+}
+.plus-btn:hover{ background: rgba(168,85,247,0.18); transform: translateY(-1px); }
+.bubble-sent{
+  background: linear-gradient(135deg,#8b5cf6,#6d28d9);
+  box-shadow: 0 0 16px rgba(139,92,246,0.3);
+}
+.bubble-received{
+  background: #1e1b2e;
+  border: 1px solid rgba(168,85,247,0.15);
+}
+.msg-menu{ box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+.msg-image{
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: block;
+  object-fit: cover;
+}
+.custom-scroll{ scrollbar-width: thin; scrollbar-color: #6d28d9 transparent; }
+.custom-scroll::-webkit-scrollbar{ width:6px; }
+.custom-scroll::-webkit-scrollbar-thumb{ background:#6d28d9; border-radius:6px; }
+.custom-scroll::-webkit-scrollbar-track{ background:transparent; }
+input:focus{ outline:none; box-shadow:0 0 0 2px rgba(168,85,247,0.4); }
+.fade-in{ animation: fadeIn .2s ease; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }

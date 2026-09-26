@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Secret Chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="h-screen w-full overflow-hidden flex flex-col bg-[#0a0818] text-white">
+
+<!-- JOIN SCREEN -->
+<div id="joinScreen" class="flex-1 min-h-0 flex items-center justify-center p-4">
+  <div class="glass rounded-2xl p-8 w-full max-w-sm">
+    <h1 class="text-2xl font-semibold mb-1 text-center">Secret Chat</h1>
+    <p class="text-sm text-purple-300/70 text-center mb-6">Anonymous. No login. Just a code.</p>
+
+    <label class="text-xs text-purple-300/70 mb-1 block">Nickname</label>
+    <input id="nickname" maxlength="20" placeholder="Elon Musk"
+      class="w-full mb-4 px-4 py-2.5 rounded-lg bg-black/30 border border-purple-500/20 text-gray-100 placeholder-gray-500">
+
+    <label class="text-xs text-purple-300/70 mb-1 block">Secret Room Code</label>
+    <input id="roomCode" placeholder="secret789"
+      class="w-full mb-4 px-4 py-2.5 rounded-lg bg-black/30 border border-purple-500/20 text-gray-100 placeholder-gray-500">
+
+    <button id="createRoomBtn" class="btn-ghost w-full mb-3 py-2.5 rounded-lg text-sm">Create Random Room</button>
+    <button id="joinBtn" class="btn-glow w-full py-2.5 rounded-lg font-medium">Join Secret Chat</button>
+
+    <p id="joinError" class="text-red-400 text-xs mt-3 text-center hidden"></p>
+  </div>
+</div>
+
+<!-- CHAT SCREEN (fixed, WhatsApp/Instagram style: header / scroll area / input) -->
+<div id="chatScreen" class="flex-1 min-h-0 hidden flex flex-col">
+
+  <header class="flex-none z-10 border-b border-purple-900/40 bg-[#0a0818]/80 backdrop-blur-md px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+    <div class="min-w-0 flex-1">
+      <p class="text-sm font-semibold truncate">Room: <span id="roomLabel" class="text-purple-300"></span></p>
+      <p class="text-xs text-gray-500 truncate">as <span id="nickLabel"></span></p>
+    </div>
+    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+      <button id="copyLinkBtn" title="Copy Link" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M9 12a4 4 0 0 1 4-4h2a4 4 0 1 1 0 8h-1"/><path d="M15 12a4 4 0 0 1-4 4H9a4 4 0 1 1 0-8h1"/></svg>
+        <span class="btn-label hidden sm:inline text-xs">Copy Link</span>
+      </button>
+      <button id="saveBtn" title="Save Chat" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span class="hidden sm:inline text-xs">Save</span>
+      </button>
+      <button id="deleteBtn" title="Delete All Chat" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13"/></svg>
+        <span class="hidden sm:inline text-xs">Delete</span>
+      </button>
+      <button id="leaveBtn" title="Leave Room" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+        <span class="hidden sm:inline text-xs">Leave</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="messages" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 custom-scroll"></div>
+
+  <div class="flex-none z-10 border-t border-purple-900/40 bg-[#0a0818]/90 backdrop-blur-md p-3 sm:p-4 flex gap-2 items-center">
+    <button id="plusBtn" title="Send Image" class="plus-btn w-10 h-10 shrink-0 rounded-lg flex items-center justify-center text-xl leading-none">+</button>
+    <input type="file" id="imageInput" accept="image/*" class="hidden">
+    <input id="msgInput" placeholder="Type a secret..." autocomplete="off"
+      class="flex-1 min-w-0 px-4 py-2.5 rounded-lg bg-black/30 border border-purple-500/20 text-gray-100 placeholder-gray-500">
+    <button id="sendBtn" class="btn-glow px-4 sm:px-5 py-2.5 rounded-lg font-medium shrink-0">Send</button>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="deleteModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
+  <div class="glass rounded-2xl p-6 w-full max-w-sm">
+    <h2 class="font-semibold mb-2">Delete all chat?</h2>
+    <p class="text-sm text-gray-400 mb-5">This wipes the room's messages for everyone, instantly. This can't be undone.</p>
+    <div class="flex gap-3">
+      <button id="cancelDelete" class="btn-ghost flex-1 py-2 rounded-lg text-sm">Cancel</button>
+      <button id="confirmDelete" class="flex-1 py-2 rounded-lg text-sm font-medium bg-red-600/80 hover:bg-red-600">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE PREVIEW MODAL -->
+<div id="imageModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+  <button id="closeImageModal" class="absolute top-4 right-4 text-white text-3xl leading-none">&times;</button>
+  <img id="imageModalImg" src="" class="max-w-full max-h-full rounded-xl" alt="full size">
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
