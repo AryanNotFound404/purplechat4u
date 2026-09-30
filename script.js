@@ -1,4 +1,4 @@
-// ==== PASTE YOUR FIREBASE CONFIG HERE ====
+
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -81,7 +81,7 @@ function joinRoom(nickname, room){
   state.presenceRef.set({ nickname, status: 'online', joinedAt: Date.now() });
   state.presenceRef.onDisconnect().set({ nickname, status: 'offline', joinedAt: Date.now() });
 
-  // Listen for users status & deduplicate duplicates by nickname
+  // Listen for users status & deduplicate
   state.presenceAllRef.on('value', snap => {
     const presenceData = snap.val() || {};
     state.onlineUsers = Object.values(presenceData);
@@ -121,18 +121,31 @@ function joinRoom(nickname, room){
   });
 }
 
+// TOP-RIGHT ROUND BUTTON MODAL LOGIC
+$('openMsgModalBtn').onclick = () => {
+  $('msgModal').classList.remove('hidden');$('msgModal').classList.add('flex');
+  setTimeout(() => $('modalMsgInput').focus(), 100);
+};
+
+$('closeMsgModal').onclick = () => {
+  $('msgModal').classList.add('hidden');$('msgModal').classList.remove('flex');
+};
+
+$('modalPlusBtn').onclick = () => {$('imageInput').click();
+  $('msgModal').classList.add('hidden');$('msgModal').classList.remove('flex');
+};
+
+$('modalSendBtn').onclick = () => {
+  const text = $('modalMsgInput').value.trim();
+  if (!text) return;
+  sendMessageText(text);
+  $('modalMsgInput').value = '';
+  $('msgModal').classList.add('hidden');$('msgModal').classList.remove('flex');
+};
+
 // REALTIME ONLINE USERS HEADER STATUS
 function updateOnlineStatusHeader(onlineUsers) {
-  let statusEl = $('onlineStatusLabel');
-  if (!statusEl) {
-    const headerTitleBox = $('headerTitleBox');
-    if (headerTitleBox) {
-      statusEl = document.createElement('p');
-      statusEl.id = 'onlineStatusLabel';
-      statusEl.className = 'text-xs text-purple-300/80 mt-0.5 flex items-center gap-1.5 font-normal';
-      headerTitleBox.appendChild(statusEl);
-    }
-  }
+  const statusEl = $('onlineStatusLabel');
   if (!statusEl) return;
 
   const count = onlineUsers.length;
@@ -153,7 +166,7 @@ function updateOnlineStatusHeader(onlineUsers) {
   statusEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ${text}`;
 }
 
-// RENDER USERS LIST INSIDE MODAL (DEDUPLICATED)
+// RENDER USERS LIST INSIDE MODAL
 function renderOnlineUsersList(uniqueUsers = null) {
   const listEl = $('onlineUsersList');
   if (!listEl) return;
@@ -183,7 +196,6 @@ function renderOnlineUsersList(uniqueUsers = null) {
     return;
   }
 
-  // Sort: 'You' first, then 'Online', then 'Offline'
   users.sort((a, b) => {
     if (a.nickname === state.nickname) return -1;
     if (b.nickname === state.nickname) return 1;
@@ -216,20 +228,29 @@ function renderOnlineUsersList(uniqueUsers = null) {
 }
 
 // HEADER CLICK TO OPEN USERS MODAL
-$('headerTitleBox').onclick = () => {
-  renderOnlineUsersList();
-  $('onlineUsersModal').classList.remove('hidden');$('onlineUsersModal').classList.add('flex');
-};
+const headerBox = $('headerTitleBox');
+if (headerBox) {
+  headerBox.onclick = () => {
+    renderOnlineUsersList();
+    const modal = $('onlineUsersModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  };
+}
 
-$('closeOnlineModal').onclick = () => {
-  $('onlineUsersModal').classList.add('hidden');$('onlineUsersModal').classList.remove('flex');
-};
-
-$('onlineUsersModal').addEventListener('click', e => {
-  if (e.target.id === 'onlineUsersModal') {
+if ($('closeOnlineModal')) {$('closeOnlineModal').onclick = () => {
     $('onlineUsersModal').classList.add('hidden');$('onlineUsersModal').classList.remove('flex');
-  }
-});
+  };
+}
+
+if ($('onlineUsersModal')) {$('onlineUsersModal').addEventListener('click', e => {
+    if (e.target.id === 'onlineUsersModal') {
+      $('onlineUsersModal').classList.add('hidden');$('onlineUsersModal').classList.remove('flex');
+    }
+  });
+}
 
 function fmtTime(ts){
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -449,13 +470,8 @@ $('imageModal').addEventListener('click', e => {
   if(e.target.id === 'imageModal' || e.target.id === 'closeImageModal') closeImageModal();
 });
 
-function sendMessage(e){
-  if(e) e.preventDefault();
-  const input = $('msgInput');
-  const text = input.value.trim();
+function sendMessageText(text){
   if(!text || !state.msgsRef) return;
-
-  input.value = '';
 
   const messageData = { 
     type: 'message', 
@@ -477,6 +493,15 @@ function sendMessage(e){
     console.error("Firebase Send Error:", err);
     alert('Message failed to send — check the browser console for details.');
   });
+}
+
+function sendMessage(e){
+  if(e) e.preventDefault();
+  const input = $('msgInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  sendMessageText(text);
 }
 
 $('sendBtn').onclick = sendMessage;
@@ -523,42 +548,6 @@ $('plusBtn').onclick = () => $('imageInput').click();$('imageInput').addEventLis
     alert('Could not process that image.');
   }
 });
-
-$('saveBtn').onclick = () => {
-  const lines = Object.entries(messagesCache)
-    .sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0))
-    .map(([id, m]) => {
-      const time = fmtTime(m.ts);
-      if(m.type === 'system') return `[${time}] * ${m.text}`;
-      const body = m.type === 'image' ? '[Image]' : (m.text || '');
-      const editedTag = m.edited ? ' (edited)' : '';
-      return `[${time}] ${m.nickname}: ${body}${editedTag}`;
-    });
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `secret-chat-${state.room}-${Date.now()}.txt`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
-
-$('copyLinkBtn').onclick = () => {
-  const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(state.room)}`;
-  const label = $('copyLinkBtn').querySelector('.btn-label');
-  navigator.clipboard.writeText(url).then(() => {
-    if(label){
-      const prev = label.textContent;
-      label.textContent = 'Copied!';
-      setTimeout(() => { label.textContent = prev; }, 1500);
-    }
-  }).catch(() => alert('Could not copy automatically. Here is the link:\n' + url));
-};
-
-$('deleteBtn').onclick = () => { $('deleteModal').classList.remove('hidden');$('deleteModal').classList.add('flex'); };
-$('cancelDelete').onclick = () => {$('deleteModal').classList.add('hidden'); $('deleteModal').classList.remove('flex'); };$('confirmDelete').onclick = () => {
-  if(state.msgsRef) state.msgsRef.remove();
-  $('deleteModal').classList.add('hidden');$('deleteModal').classList.remove('flex');
-};
 
 $('leaveBtn').onclick = () => {
   if(state.presenceRef) state.presenceRef.set({ nickname: state.nickname, status: 'offline', joinedAt: Date.now() });
