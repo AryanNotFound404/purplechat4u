@@ -42,20 +42,23 @@
       <p class="text-xs text-gray-500 truncate">as <span id="nickLabel"></span></p>
       <p id="onlineStatusLabel" class="text-xs text-purple-300/80 mt-0.5 flex items-center gap-1.5 font-normal min-h-[16px]"></p>
     </div>
-    
-    <div class="flex items-center gap-1.5 shrink-0">
-      <!-- TOP RIGHT ROUND CHAT BUTTON -->
-      <button id="openMsgModalBtn" title="Send Message" class="w-10 h-10 rounded-full btn-glow flex items-center justify-center shrink-0 shadow-lg border border-purple-400/30">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-white">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-      </button>
 
-      <button id="copyLinkBtn" title="Copy Link" class="btn-ghost flex items-center gap-1.5 px-2 py-2 rounded-lg">
+    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+      <button id="copyLinkBtn" title="Copy Link" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M9 12a4 4 0 0 1 4-4h2a4 4 0 1 1 0 8h-1"/><path d="M15 12a4 4 0 0 1-4 4H9a4 4 0 1 1 0-8h1"/></svg>
+        <span class="btn-label hidden sm:inline text-xs">Copy Link</span>
       </button>
-      <button id="leaveBtn" title="Leave Room" class="btn-ghost flex items-center gap-1.5 px-2 py-2 rounded-lg">
+      <button id="saveBtn" title="Save Chat" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span class="hidden sm:inline text-xs">Save</span>
+      </button>
+      <button id="deleteBtn" title="Delete All Chat" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13"/></svg>
+        <span class="hidden sm:inline text-xs">Delete</span>
+      </button>
+      <button id="leaveBtn" title="Leave Room" class="btn-ghost flex items-center gap-1.5 px-2 sm:px-2.5 py-2 rounded-lg">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0"><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+        <span class="hidden sm:inline text-xs">Leave</span>
       </button>
     </div>
   </header>
@@ -63,31 +66,13 @@
   <!-- Messages List -->
   <div id="messages" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 custom-scroll"></div>
 
-  <!-- Standard Bottom Input Bar -->
+  <!-- Bottom Input Bar -->
   <div class="flex-none z-10 border-t border-purple-900/40 bg-[#0a0818]/90 backdrop-blur-md p-3 sm:p-4 flex gap-2 items-center input-container">
     <button id="plusBtn" title="Send Image" class="plus-btn w-10 h-10 shrink-0 rounded-lg flex items-center justify-center text-xl leading-none">+</button>
     <input type="file" id="imageInput" accept="image/*" class="hidden">
     <input id="msgInput" placeholder="Type a secret..." autocomplete="off"
       class="flex-1 min-w-0 px-4 py-2.5 rounded-lg bg-black/30 border border-purple-500/20 text-gray-100 placeholder-gray-500">
     <button id="sendBtn" class="btn-glow px-4 sm:px-5 py-2.5 rounded-lg font-medium shrink-0">Send</button>
-  </div>
-</div>
-
-<!-- POPUP MESSAGE MODAL (Triggered by Top Right Round Button) -->
-<div id="msgModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-  <div class="glass rounded-2xl p-5 w-full max-w-sm relative border border-purple-500/30 shadow-2xl">
-    <div class="flex items-center justify-between mb-3 border-b border-purple-500/20 pb-2">
-      <h3 class="font-semibold text-purple-200 text-sm">Send Secret Message</h3>
-      <button id="closeMsgModal" class="text-purple-300 hover:text-white text-xl font-bold px-1">&times;</button>
-    </div>
-    
-    <textarea id="modalMsgInput" rows="3" placeholder="Type message here..."
-      class="w-full px-3 py-2 rounded-lg bg-black/40 border border-purple-500/30 text-gray-100 placeholder-gray-500 text-sm resize-none mb-3 focus:outline-none focus:border-purple-400"></textarea>
-    
-    <div class="flex gap-2 justify-end">
-      <button id="modalPlusBtn" class="plus-btn px-3 py-2 rounded-lg text-sm">📷 Photo</button>
-      <button id="modalSendBtn" class="btn-glow px-5 py-2 rounded-lg font-medium text-sm">Send</button>
-    </div>
   </div>
 </div>
 
@@ -99,6 +84,18 @@
       <button id="closeOnlineModal" class="text-purple-300 hover:text-white text-xl font-bold px-1">&times;</button>
     </div>
     <div id="onlineUsersList" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1"></div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="deleteModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
+  <div class="glass rounded-2xl p-6 w-full max-w-sm">
+    <h2 class="font-semibold mb-2">Delete all chat?</h2>
+    <p class="text-sm text-gray-400 mb-5">This wipes the room's messages for everyone, instantly. This can't be undone.</p>
+    <div class="flex gap-3">
+      <button id="cancelDelete" class="btn-ghost flex-1 py-2 rounded-lg text-sm">Cancel</button>
+      <button id="confirmDelete" class="flex-1 py-2 rounded-lg text-sm font-medium bg-red-600/80 hover:bg-red-600">Delete</button>
+    </div>
   </div>
 </div>
 
