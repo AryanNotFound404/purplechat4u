@@ -1,4 +1,4 @@
-
+// ==== PASTE YOUR FIREBASE CONFIG HERE ====
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -120,28 +120,6 @@ function joinRoom(nickname, room){
     if(!snap.exists()){ messagesEl.innerHTML = ''; messagesCache = {}; }
   });
 }
-
-// TOP-RIGHT ROUND BUTTON MODAL LOGIC
-$('openMsgModalBtn').onclick = () => {
-  $('msgModal').classList.remove('hidden');$('msgModal').classList.add('flex');
-  setTimeout(() => $('modalMsgInput').focus(), 100);
-};
-
-$('closeMsgModal').onclick = () => {
-  $('msgModal').classList.add('hidden');$('msgModal').classList.remove('flex');
-};
-
-$('modalPlusBtn').onclick = () => {$('imageInput').click();
-  $('msgModal').classList.add('hidden');$('msgModal').classList.remove('flex');
-};
-
-$('modalSendBtn').onclick = () => {
-  const text = $('modalMsgInput').value.trim();
-  if (!text) return;
-  sendMessageText(text);
-  $('modalMsgInput').value = '';
-  $('msgModal').classList.add('hidden');$('msgModal').classList.remove('flex');
-};
 
 // REALTIME ONLINE USERS HEADER STATUS
 function updateOnlineStatusHeader(onlineUsers) {
@@ -470,8 +448,13 @@ $('imageModal').addEventListener('click', e => {
   if(e.target.id === 'imageModal' || e.target.id === 'closeImageModal') closeImageModal();
 });
 
-function sendMessageText(text){
+function sendMessage(e){
+  if(e) e.preventDefault();
+  const input = $('msgInput');
+  const text = input.value.trim();
   if(!text || !state.msgsRef) return;
+
+  input.value = '';
 
   const messageData = { 
     type: 'message', 
@@ -493,15 +476,6 @@ function sendMessageText(text){
     console.error("Firebase Send Error:", err);
     alert('Message failed to send — check the browser console for details.');
   });
-}
-
-function sendMessage(e){
-  if(e) e.preventDefault();
-  const input = $('msgInput');
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = '';
-  sendMessageText(text);
 }
 
 $('sendBtn').onclick = sendMessage;
@@ -548,6 +522,42 @@ $('plusBtn').onclick = () => $('imageInput').click();$('imageInput').addEventLis
     alert('Could not process that image.');
   }
 });
+
+$('saveBtn').onclick = () => {
+  const lines = Object.entries(messagesCache)
+    .sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0))
+    .map(([id, m]) => {
+      const time = fmtTime(m.ts);
+      if(m.type === 'system') return `[${time}] * ${m.text}`;
+      const body = m.type === 'image' ? '[Image]' : (m.text || '');
+      const editedTag = m.edited ? ' (edited)' : '';
+      return `[${time}] ${m.nickname}: ${body}${editedTag}`;
+    });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `secret-chat-${state.room}-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+$('copyLinkBtn').onclick = () => {
+  const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(state.room)}`;
+  const label = $('copyLinkBtn').querySelector('.btn-label');
+  navigator.clipboard.writeText(url).then(() => {
+    if(label){
+      const prev = label.textContent;
+      label.textContent = 'Copied!';
+      setTimeout(() => { label.textContent = prev; }, 1500);
+    }
+  }).catch(() => alert('Could not copy automatically. Here is the link:\n' + url));
+};
+
+$('deleteBtn').onclick = () => { $('deleteModal').classList.remove('hidden');$('deleteModal').classList.add('flex'); };
+$('cancelDelete').onclick = () => {$('deleteModal').classList.add('hidden'); $('deleteModal').classList.remove('flex'); };$('confirmDelete').onclick = () => {
+  if(state.msgsRef) state.msgsRef.remove();
+  $('deleteModal').classList.add('hidden');$('deleteModal').classList.remove('flex');
+};
 
 $('leaveBtn').onclick = () => {
   if(state.presenceRef) state.presenceRef.set({ nickname: state.nickname, status: 'offline', joinedAt: Date.now() });
